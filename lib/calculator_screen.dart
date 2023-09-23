@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:js_util';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_based_calculator/buttons.dart';
 
@@ -11,6 +13,9 @@ class CalculatorScreen extends StatefulWidget {
 }
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
+  String number1 = "";
+  String operand = "";
+  String number2 = "";
   @override
   Widget build(BuildContext context) {
     final screen = MediaQuery.of(context).size;
@@ -26,7 +31,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   alignment: Alignment.bottomRight,
                   padding: EdgeInsets.all(16),
                   child: Text(
-                    "0",
+                    "${number1.toString()} ${operand.toString()} ${number2.toString()}",
                     style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.end,
                   ),
@@ -57,8 +62,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             borderSide: BorderSide(color: Colors.white24),
             borderRadius: BorderRadius.circular(100)),
         child: InkWell(
-          onTap: () {},
-          child: Center(child: Text(value)),
+          onTap: () => onBtnTap(value.toString()),
+          child: Center(
+              child: Text(
+            value,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+          )),
         ),
       ),
     );
@@ -77,5 +86,46 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           ].contains(value)
             ? Colors.orange
             : Colors.black87;
+  }
+
+  void onBtnTap(String value) {
+    if (value == Btn.del) {
+      delete();
+      return;
+    }
+    appendValue(value);
+  }
+
+  void delete() {
+    if (number2.isNotEmpty) {
+      number2 = number2.substring(0, number2.length - 1);
+    } else if (operand.isNotEmpty) {
+      operand = "";
+    } else if (number1.isNotEmpty) {
+      number1 = number1.substring(0, number1.length - 1);
+    }
+  }
+
+  void appendValue(String value) {
+    if (value != Btn.dot && int.tryParse(value) == null) {
+      // operanfd pressed
+      if (operand.isNotEmpty && number2.isNotEmpty) {
+        // if there is already an operand
+      }
+      operand = value;
+    } else if (number1.isEmpty || operand.isEmpty) {
+      if (value == Btn.dot && number1.contains(Btn.dot)) return;
+      if (value == Btn.dot && (number1.isEmpty || number1 == Btn.n0)) {
+        value = "0.";
+      }
+      number1 += value;
+    } else if (number2.isEmpty || operand.isNotEmpty) {
+      if (value == Btn.dot && number1.contains(Btn.dot)) return;
+      if (value == Btn.dot && (number1.isEmpty || number1 == Btn.n0)) {
+        value = "0.";
+      }
+      number2 += value;
+    }
+    setState(() {});
   }
 }
