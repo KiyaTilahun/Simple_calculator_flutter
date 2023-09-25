@@ -1,7 +1,5 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
-import 'dart:js_util';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_based_calculator/buttons.dart';
 
@@ -93,7 +91,67 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       delete();
       return;
     }
+    if (value == Btn.clr) {
+      clear();
+      return;
+    }
+    if (value == Btn.per) {
+      convertTopercentage();
+      return;
+    }
+    if (value == Btn.calculate) {
+      calculate();
+      return;
+    }
+
     appendValue(value);
+  }
+
+  void calculate() {
+    if (number1.isEmpty || number2.isEmpty || operand.isEmpty) {
+      return;
+    }
+    double num1 = double.parse(number1);
+    double num2 = double.parse(number2);
+    var result = 0.0;
+    switch (operand) {
+      case Btn.add:
+        result = num1 + num2;
+        break;
+      case Btn.subtract:
+        result = num1 - num2;
+        break;
+      case Btn.multiply:
+        result = num1 * num2;
+        break;
+      case Btn.divide:
+        result = num1 / num2;
+        break;
+      default:
+    }
+    setState(() {
+      number1 = "$result";
+      if (number1.endsWith(".0")) {
+        number1 = number1.substring(0, number1.length - 2);
+      }
+    });
+    operand = "";
+    number2 = "";
+  }
+
+  void convertTopercentage() {
+    if (number1.isNotEmpty && operand.isNotEmpty && number2.isNotEmpty) {
+      calculate();
+    }
+    if (operand.isNotEmpty) {
+      return;
+    }
+    final number = double.parse(number1);
+    setState(() {
+      number1 = "${(number / 100)}";
+      operand = "";
+      number2 = "";
+    });
   }
 
   void delete() {
@@ -104,12 +162,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     } else if (number1.isNotEmpty) {
       number1 = number1.substring(0, number1.length - 1);
     }
+    setState(() {});
+  }
+
+  void clear() {
+    setState(() {
+      number1 = "";
+      operand = "";
+      number2 = "";
+    });
   }
 
   void appendValue(String value) {
     if (value != Btn.dot && int.tryParse(value) == null) {
       // operanfd pressed
       if (operand.isNotEmpty && number2.isNotEmpty) {
+        calculate();
         // if there is already an operand
       }
       operand = value;
